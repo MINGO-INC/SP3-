@@ -1,0 +1,97 @@
+@startuml
+'https://plantuml.com/class-diagram
+!pragma layout smetana
+class Main
+class Season
+
+
+
+class Main{
++ static void main()
+}
+
+class StreamingService{
++login()
++displayStartMenu()
++displayMainMenu()
+}
+
+class User{
+- String name
+-recentlyViewed
+-arrayList<Media>watchList
+-arrayList<Media>saveMedia
+-arrayList<Media>allMedia
++addMedia()
++removeMedia()
++user(recentlyViewed, favorite, addMedia, removeMedia)
++getName()
+
+}
+
+
+class Media{
+-title
+-ArrayList<String>genres
+-releasDate
+-rating
+media(title,ArrayList<String>genre,rating, releasDate)
+getTitle()
+toString()
+showCategories()
+
+}
+
+class Series{
+-seasons
+-episodes
+series(Seasons, Episodes)
+toString()
+}
+
+class Season{
+-season
+-episode
+season()
+toString()
+}
+
+class Movie{
+-movieLength
+
+toString()
+}
+
+
+
+interface Data{
+
+
+}
+
+class FileIO{
+ArrayList<Media> readFile (String fileName)
+new File (fileName)
+new Scanner (file)
+}
+
+
+
+
+Main *-- StreamingService
+StreamingService *-- User
+User *-- Media
+Media <|-- Movie
+Media <|-- Series
+
+Data <|.- FileIO
+Media *-- Data
+
+
+Series *-- Season
+
+
+
+
+
+@enduml
