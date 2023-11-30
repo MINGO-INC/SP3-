@@ -2,16 +2,18 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Scanner;
 
 public class StreamingService {
     private static FileIO fileIO = new FileIO();
-    private static Database database=new Database();
+    private static Database database = new Database();
 
     private static ArrayList<Media> movieData = fileIO.readFile("/Users/mingo/Documents/GitHub/SP3/SP3NewVersion/src/main/java/100bedstefilm.txt", "movie");
     private static ArrayList<Media> seriesData = fileIO.readFile("/Users/mingo/Documents/GitHub/SP3/SP3NewVersion/src/main/java/100bedsteserier.txt", "series");
     private static String fileName = "/Users/mingo/Documents/GitHub/SP3/SP3NewVersion/src/main/java/user.txt";// til login
+
     public static void ConsoleLogin() {
 
         Scanner scanner = new Scanner(System.in);
@@ -25,10 +27,23 @@ public class StreamingService {
             scanner.nextLine();
             switch (choice) {
                 case 1:
-                    login(scanner);
+                    System.out.println("Enter  username");
+                    String username1 = scanner.nextLine();
+
+                    System.out.println("Enter password");
+                    String password1 = scanner.nextLine();
+                    database.checkLogin(username1, password1);
+                    displayMenu();
                     break;
                 case 2:
-                    register(scanner);
+                    System.out.print("Enter username: ");
+                    String username = scanner.nextLine();
+
+                    System.out.print("Enter password: ");
+                    String password = scanner.nextLine();
+
+                    database.register(username, password);
+                    // register(scanner);
                     break;
                 case 3:
                     System.out.println("Exiting the program. Goodbye!");
@@ -45,6 +60,7 @@ public class StreamingService {
 
         System.out.print("Enter password: ");
         String password = scanner.nextLine();
+
 
         if (checkLogin(username, password)) {
             System.out.println("Login successful!");
@@ -86,7 +102,7 @@ public class StreamingService {
     }
 
     private static void saveRegistration(String username, String password) {
-        try (FileWriter writer = new FileWriter(fileName,true)) {
+        try (FileWriter writer = new FileWriter(fileName, true)) {
             writer.write(username + "," + password + "\n");
         } catch (IOException e) {
         }
@@ -100,9 +116,10 @@ public class StreamingService {
             System.out.println("2. Pick a movie");
             System.out.println("3. Pick a series");
             System.out.println("4. Search for a genre");
-            System.out.println("5. Show watch list");
-            System.out.println("6. Show saved media");
-            System.out.println("7. logout");
+            System.out.println("5. Search for a titel");
+            System.out.println("6. Show watch list");
+            System.out.println("7. Show saved media");
+            System.out.println("8. logout");
             System.out.print("Choose an option: ");
             int choice = scan.nextInt();
             scan.nextLine();
@@ -118,26 +135,35 @@ public class StreamingService {
                     for (Media movie : movieData) {
                         System.out.println(movie.getTitle());
                     }
-                    addMediaToList(scan,user);
+                    // addMediaToList(scan,user);
                     break;
                 case 3:
                     for (Media series : seriesData) {
                         System.out.println(series.getTitle());
                     }
-                    addMediaToList(scan,user);
+                    // addMediaToList(scan,user);
                     break;
                 case 4:
-                    searchForGenre(scan);
-                    break;
+                    System.out.println("name the genre you want to search for");
+                    String getInput = scan.nextLine();
+                    database.readGenre(getInput);
                 case 5:
+                    database.readData();
+                    System.out.println("enter the name of the movie you want to watch");
+                    String input= scan.nextLine();
+                    database.findMovieByTitle(input);
+                   // String searchedGenre = database.readGenre(getInput);
+                    //System.out.println(searchedGenre);
+                    break;
+                case 6:
                     System.out.println(user.watchList);
 
                     break;
-                case 6:
-                    System.out.println(user.saveMedia);
-                    removeMediaFromSavedList(scan,user);
-                    break;
                 case 7:
+                    System.out.println(user.saveMedia);
+                    //removeMediaFromSavedList(scan,user);
+                    break;
+                case 8:
                     ConsoleLogin();
                     break;
                 default:
@@ -148,7 +174,7 @@ public class StreamingService {
     }
 
 
-    private static void addMediaToList(Scanner scanner, User user) {
+ /*   private static void addMediaToList(Scanner scanner, User user) {
         System.out.print("Enter the title of the movie or series you want to add: ");
         String selectedTitle = scanner.nextLine();
 
@@ -200,7 +226,11 @@ public class StreamingService {
         } else {
             System.out.println("Media not found.");
         }
-    }
+    }*/
+
+
+
+    /*
     private static Media findMovieByTitle(String title) {
         for (Media movie : movieData) {
             if (movie.getTitle().equalsIgnoreCase(title)) {
@@ -208,18 +238,44 @@ public class StreamingService {
             }
         }
     return null;
-    }
+    }*/
 
-    private static Media findSeriesByTitle(String title) {
+/*
+    private static Media findMovieByTitle(String title) {
+        try (Connection connection = DriverManager.getConnection("", "your_username", "your_password")) {
+            String query = "SELECT * FROM movies WHERE title = ?";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+                preparedStatement.setString(1, title);
+
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    if (resultSet.next()) {
+                        // Create and return a Media object based on the database result
+                        String movieTitle = resultSet.getString("title");
+                        String genre = resultSet.getString("genre");
+                        // Add other fields as needed
+
+                        // Return a Media object (you may need to create a constructor for Media)
+                        return new Media(movieTitle, genre);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace(); // Handle the exception appropriately
+        }
+
+        return null;
+*/
+
+   /* private static Media findSeriesByTitle(String title) {
         for (Media series : seriesData) {
             if (series.getTitle().equalsIgnoreCase(title)) {
                 return series;
             }
         }
         return null;
-    }
+    }*/
 
-    private static void removeMediaFromSavedList(Scanner scanner, User user){
+  /* private static void removeMediaFromSavedList(Scanner scanner, User user){
         System.out.println("Do you want to remove a media from watch list? (y/n)");
         String input1 = scanner.nextLine();
 
@@ -239,38 +295,6 @@ public class StreamingService {
 
             }
         }
+    }*/
     }
 
-
-    private static void searchForGenre(Scanner scanner) {
-        boolean found = false;
-        System.out.println("Enter the genre you want to browse through");
-        String searchedGenre = scanner.nextLine();
-
-        System.out.println("Media in " + searchedGenre + " :");
-        for (Media movie : movieData) {
-            for (String s : movie.getGenres()) {
-                if (s.trim().equalsIgnoreCase(searchedGenre.trim())) {
-                    System.out.println(movie.toString());
-                    found = true;
-                }
-            }
-        }
-
-        for (Media series : seriesData) {
-            for (String s : series.getGenres()) {
-                if (s.trim().equalsIgnoreCase(searchedGenre.trim())) {
-                    System.out.println(series.toString());
-                    found = true;
-                }
-            }
-        }
-
-            if (!found) {
-                System.out.println("Nothing found in the searched genre");
-            } else {
-                System.out.println("Media search for '" + searchedGenre + "' completed.");
-            }
-
-        }
-    }

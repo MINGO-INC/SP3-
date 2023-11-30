@@ -10,8 +10,12 @@ public class Main {
     Database database=new Database();
    // database.readData();
 
+        
+        //todo watchlist
+        //todo savedlist
+        //todo hvis vi har tid lav en bruger database med filmlist.
 
-    //todo lav om på film listen så du kan kalde ud fra databasen.
-        //todo loging ud fra databbasen.
+
+
     }
 }
