@@ -150,13 +150,15 @@ public class StreamingService {
                 case 5:
                     database.readData();
                     System.out.println("enter the name of the movie you want to watch");
-                    String input= scan.nextLine();
+                    String input=scan.nextLine();
                     database.findMovieByTitle(input);
+                    database.findMovieByID(input);
                    // String searchedGenre = database.readGenre(getInput);
                     //System.out.println(searchedGenre);
                     break;
                 case 6:
-                    System.out.println(user.watchList);
+                    database.movieArrayPrint();
+                   // System.out.println(user.watchList);
 
                     break;
                 case 7:
@@ -164,6 +166,7 @@ public class StreamingService {
                     //removeMediaFromSavedList(scan,user);
                     break;
                 case 8:
+
                     ConsoleLogin();
                     break;
                 default:

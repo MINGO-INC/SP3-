@@ -9,11 +9,15 @@ public class Main {
 
     Database database=new Database();
    // database.readData();
-
-        
-        //todo watchlist
+        //todo metode der kalder film ud fra brugerID
+        //todo fix switch i streamingservice
+        //todo fix arrayList i "movieID"
+        // refactor navn på nogle metoder.
+        //
+        //---------------
         //todo savedlist
         //todo hvis vi har tid lav en bruger database med filmlist.
+        //todo  remove from list
 
 
 
