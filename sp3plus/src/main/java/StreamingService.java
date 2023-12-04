@@ -2,7 +2,6 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.sql.*;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -14,7 +13,7 @@ public class StreamingService {
     private static ArrayList<Media> seriesData = fileIO.readFile("/Users/mingo/Documents/GitHub/SP3/SP3NewVersion/src/main/java/100bedsteserier.txt", "series");
     private static String fileName = "/Users/mingo/Documents/GitHub/SP3/SP3NewVersion/src/main/java/user.txt";// til login
 
-    public static void ConsoleLogin() {
+    public static void consoleLogin() {
 
         Scanner scanner = new Scanner(System.in);
         while (true) {
@@ -27,12 +26,7 @@ public class StreamingService {
             scanner.nextLine();
             switch (choice) {
                 case 1:
-                    System.out.println("Enter  username");
-                    String username1 = scanner.nextLine();
-
-                    System.out.println("Enter password");
-                    String password1 = scanner.nextLine();
-                    database.checkLogin(username1, password1);
+                    database.readString();
                     displayMenu();
                     break;
                 case 2:
@@ -43,7 +37,6 @@ public class StreamingService {
                     String password = scanner.nextLine();
 
                     database.register(username, password);
-                    // register(scanner);
                     break;
                 case 3:
                     System.out.println("Exiting the program. Goodbye!");
@@ -135,13 +128,11 @@ public class StreamingService {
                     for (Media movie : movieData) {
                         System.out.println(movie.getTitle());
                     }
-                    // addMediaToList(scan,user);
                     break;
                 case 3:
                     for (Media series : seriesData) {
                         System.out.println(series.getTitle());
                     }
-                    // addMediaToList(scan,user);
                     break;
                 case 4:
                     System.out.println("name the genre you want to search for");
@@ -152,22 +143,17 @@ public class StreamingService {
                     System.out.println("enter the name of the movie you want to watch");
                     String input=scan.nextLine();
                     database.findMovieByTitle(input);
-                    database.findMovieByID(input);
-                   // String searchedGenre = database.readGenre(getInput);
-                    //System.out.println(searchedGenre);
                     break;
                 case 6:
-                    database.movieArrayPrint();
-                   // System.out.println(user.watchList);
+                    database.printMovieFromList();
 
                     break;
                 case 7:
                     System.out.println(user.saveMedia);
-                    //removeMediaFromSavedList(scan,user);
                     break;
                 case 8:
 
-                    ConsoleLogin();
+                    consoleLogin();
                     break;
                 default:
                     System.out.println("Invalid choice. try again.");
@@ -176,128 +162,5 @@ public class StreamingService {
         }
     }
 
-
- /*   private static void addMediaToList(Scanner scanner, User user) {
-        System.out.print("Enter the title of the movie or series you want to add: ");
-        String selectedTitle = scanner.nextLine();
-
-        Media selectedMovie = findMovieByTitle(selectedTitle);
-        Media selectedSeries = findSeriesByTitle(selectedTitle);
-
-        if (selectedMovie != null || selectedSeries != null) {
-            System.out.println("Choose an option: ");
-            System.out.println("1. Play movie");
-            System.out.println("2. Add to Watch List");
-            System.out.println("3. Add to Saved Media List");
-            System.out.print("Enter the number of the list: ");
-
-            int listChoice = scanner.nextInt();
-            scanner.nextLine();
-
-            switch (listChoice) {
-                case 1:
-                    if(selectedMovie !=null) {
-                        System.out.println("you are now watching: " +selectedMovie.getTitle());
-                        user.addMediaToWatchList(selectedMovie);
-                    }
-                    else if(selectedSeries !=null){
-                        System.out.println("you are now watching: "+selectedSeries.getTitle());
-                        user.addMediaToWatchList(selectedSeries);
-                    }
-                    break;
-                case 2:
-                    if (selectedMovie != null) {
-                        user.addMediaToWatchList(selectedMovie);
-                        System.out.println("Added '" + selectedMovie.getTitle() + "' to your watch list.");
-                    } else if (selectedSeries != null) {
-                        user.addMediaToWatchList(selectedSeries);
-                        System.out.println("Added '" + selectedSeries.getTitle() + "' to your watch list.");
-                    }
-                    break;
-                case 3:
-                    if (selectedMovie != null) {
-                        user.saveMedia(selectedMovie);
-                        System.out.println("Added '" + selectedMovie.getTitle() + "' to your saved media list.");
-                    } else if (selectedSeries != null) {
-                        user.saveMedia(selectedSeries);
-                        System.out.println("Added '" + selectedSeries.getTitle() + "' to your saved media list.");
-                    }
-                    break;
-                default:
-                    System.out.println("Invalid choice. Media not added to any list.");
-            }
-        } else {
-            System.out.println("Media not found.");
-        }
-    }*/
-
-
-
-    /*
-    private static Media findMovieByTitle(String title) {
-        for (Media movie : movieData) {
-            if (movie.getTitle().equalsIgnoreCase(title)) {
-                return movie;
-            }
-        }
-    return null;
-    }*/
-
-/*
-    private static Media findMovieByTitle(String title) {
-        try (Connection connection = DriverManager.getConnection("", "your_username", "your_password")) {
-            String query = "SELECT * FROM movies WHERE title = ?";
-            try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-                preparedStatement.setString(1, title);
-
-                try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                    if (resultSet.next()) {
-                        // Create and return a Media object based on the database result
-                        String movieTitle = resultSet.getString("title");
-                        String genre = resultSet.getString("genre");
-                        // Add other fields as needed
-
-                        // Return a Media object (you may need to create a constructor for Media)
-                        return new Media(movieTitle, genre);
-                    }
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace(); // Handle the exception appropriately
-        }
-
-        return null;
-*/
-
-   /* private static Media findSeriesByTitle(String title) {
-        for (Media series : seriesData) {
-            if (series.getTitle().equalsIgnoreCase(title)) {
-                return series;
-            }
-        }
-        return null;
-    }*/
-
-  /* private static void removeMediaFromSavedList(Scanner scanner, User user){
-        System.out.println("Do you want to remove a media from watch list? (y/n)");
-        String input1 = scanner.nextLine();
-
-        if(input1.equalsIgnoreCase("y")){
-            System.out.println("Enter the title of the media to remove: ");
-            String input = scanner.nextLine();
-
-            Media seriesToRemove = findSeriesByTitle(input);
-            Media moviesToRemove = findMovieByTitle(input);
-
-            if(user.getSaveMedia().contains(seriesToRemove) || user.getSaveMedia().contains(moviesToRemove)){
-            user.removeMedia(seriesToRemove,moviesToRemove);
-                System.out.println(input + " has now been removed from your list");
-            } else{
-                System.out.println("Media not found in your list");
-                displayMenu();
-
-            }
-        }
-    }*/
     }
 

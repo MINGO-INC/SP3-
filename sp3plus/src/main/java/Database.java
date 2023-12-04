@@ -1,9 +1,10 @@
-import javax.xml.namespace.QName;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Database {
+
+    Scanner scanner = new Scanner(System.in);
 
     // database URL
     static final String DB_URL = "jdbc:mysql://localhost/my_streaming1";
@@ -83,9 +84,9 @@ public class Database {
             stmt.setString(1, username);
             stmt.setString(2, password);
 
-            int rowsAffected = stmt.executeUpdate();
+            int userLogin = stmt.executeUpdate();
 
-            if (rowsAffected > 0) {
+            if (userLogin > 0) {
                 System.out.println("User data saved successfully.");
             } else {
                 System.out.println("Failed to save user data.");
@@ -94,6 +95,16 @@ public class Database {
         } catch (SQLException se) {
             se.printStackTrace();
         }
+    }
+
+    public void readString() {
+        System.out.println("Enter  username");
+        String username = scanner.nextLine();
+
+        System.out.println("Enter password");
+        String password = scanner.nextLine();
+        checkLogin(username, password);
+
     }
 
     public void checkLogin(String username, String password) {
@@ -121,6 +132,7 @@ public class Database {
                 System.out.println("Login successful.");
             } else {
                 System.out.println("Invalid username or password.");
+                readString();
             }
             rs.close();
             stmt.close();
@@ -150,7 +162,6 @@ public class Database {
     public void readGenre(String genre) {
         Connection conn = null;
         PreparedStatement stmt = null;
-        String result = "";
 
         try {
             conn = DriverManager.getConnection(DB_URL, USER, PASS);
@@ -168,7 +179,7 @@ public class Database {
                 String movieGenre = rs.getString("genre");
                 double rating = rs.getDouble("rating");
 
-                result = name + ", " + releaseYear + ", " + movieGenre + ", " + rating;
+                String result = name + ", " + releaseYear + ", " + movieGenre + ", " + rating;
                 System.out.println(result);
             }
             rs.close();
@@ -196,7 +207,6 @@ public class Database {
     public void findMovieByTitle(String input) {
         Connection conn = null;
         PreparedStatement stmt = null;
-        String result = "";
 
         try {
             conn = DriverManager.getConnection(DB_URL, USER, PASS);
@@ -210,11 +220,8 @@ public class Database {
 
             while (rs.next()) {
                 String name = rs.getString("name");
-                int releaseYear = rs.getInt("year");
-                String movieGenre = rs.getString("genre");
-                double rating = rs.getDouble("rating");
 
-                result = name + ", " + releaseYear + ", " + movieGenre + ", " + rating;
+                String result = "you are now watching "+ name;
                 System.out.println(result);
             }
             rs.close();
@@ -238,6 +245,7 @@ public class Database {
             }
         }
     }
+
     public void findMovieByID(String input) {
         Scanner scan = new Scanner(System.in);
         Connection conn = null;
@@ -245,7 +253,6 @@ public class Database {
         int movieID = 0;
         try {
             conn = DriverManager.getConnection(DB_URL, USER, PASS);
-            System.out.println("Connecting to database...");
 
             String sql = "SELECT movieID FROM my_streaming1.movies WHERE name = ?";
             stmt = conn.prepareStatement(sql);
@@ -256,11 +263,12 @@ public class Database {
             while (rs.next()) {
                 movieID = rs.getInt("movieID");
 
+                findMovieByTitle(input);
                 System.out.println("Movie ID for " + input + ": " + movieID);
 
                 System.out.println("Enter your username");
                 String input1 = scan.nextLine();
-                watchingNowMedia(input1, movieID);
+                savedMovieInWatchedList(input1, movieID);
             }
             rs.close();
         } catch (SQLException se) {
@@ -284,7 +292,7 @@ public class Database {
     }
 
 
-    public void watchingNowMedia(String username, int movieID) {
+    public void savedMovieInWatchedList(String username, int movieID) {
 
         try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
              PreparedStatement findUserId = conn.prepareStatement("SELECT userID FROM my_streaming1.user WHERE name = ?");
@@ -297,12 +305,10 @@ public class Database {
             if (resultSet.next()) {
                 userId = resultSet.getInt("userID");
             }
+            insertMovie.setInt(1, userId);
+            insertMovie.setInt(2, movieID);
 
-                // Indsæt filmen i saved_list tabellen
-                insertMovie.setInt(1, userId);
-                insertMovie.setInt(2, movieID);
-
-                insertMovie.executeUpdate();
+            insertMovie.executeUpdate();
 
 
             System.out.println("Movie saved in watched_list for user: " + username);
@@ -312,34 +318,33 @@ public class Database {
         }
     }
 
-
-    public void movieArrayPrint(){
+    public void printMovieFromList() {
         Connection conn = null;
         PreparedStatement stmt = null;
         ArrayList<String> movieArray = new ArrayList<>();
         Scanner scanner = new Scanner(System.in);
+
         try {
-            //STEP 1: Register JDBC driver
             Class.forName("com.mysql.cj.jdbc.Driver");
 
-            //STEP 2: Open a connection
             System.out.println("Connecting to database...");
             conn = DriverManager.getConnection(DB_URL, USER, PASS);
 
-            System.out.println("Enter the movieID: ");
-            int movieID = scanner.nextInt();
+            System.out.println("Enter your username: ");
+            String username = scanner.nextLine();
 
-            //STEP 3: Execute a query
-            System.out.println("Creating statement...");
-            String sql = "SELECT * from my_streaming1.movies WHERE movieID = ?";
-            stmt = conn.prepareStatement(sql);
-            stmt.setInt(1,movieID);
+
+            String moviesSql = "SELECT * FROM my_streaming1.movies " +
+                    "JOIN watched_movies ON movies.movieID = my_streaming1.watched_movies.movieID " +
+                    "JOIN my_streaming1.user ON my_streaming1.user.userID = my_streaming1.watched_movies.userID " +
+                    "WHERE my_streaming1.user.name = ?";
+
+            stmt = conn.prepareStatement(moviesSql);
+            stmt.setString(1, username);
 
             ResultSet rs = stmt.executeQuery();
 
-            //STEP 4: Extract data from result set
             while (rs.next()) {
-
                 String name = rs.getString("name");
                 int releaseYear = rs.getInt("year");
                 String genre = rs.getString("genre");
@@ -348,27 +353,30 @@ public class Database {
                 String movieInfo = name + ", " + releaseYear + ", " + genre + ", " + rating;
                 movieArray.add(movieInfo);
             }
-                for (String movieInfo: movieArray) {
+
+            if (movieArray.isEmpty()) {
+                System.out.println("No movies found for username: " + username);
+            } else {
+                System.out.println("Movies for the user with username " + username + ":");
+                for (String movieInfo : movieArray) {
                     System.out.println(movieInfo);
                 }
+            }
 
-            //STEP 5: Clean-up environment
             rs.close();
             stmt.close();
             conn.close();
         } catch (SQLException se) {
-            //Handle errors for JDBC
             se.printStackTrace();
         } catch (Exception e) {
-            //Handle errors for Class.forName
             e.printStackTrace();
         } finally {
-            //finally block used to close resources
             try {
                 if (stmt != null)
                     stmt.close();
             } catch (SQLException se2) {
-            }// nothing we can do
+
+            }
             try {
                 if (conn != null)
                     conn.close();
@@ -376,27 +384,5 @@ public class Database {
                 se.printStackTrace();
             }
         }
-
-
-
-    }
-
-
-
-
-
-    public void removeFromList(Scanner scanner, User user) {
-        try {
-            System.out.println("Choose the media you want to remove");
-            String mediaTitle = scanner.nextLine();
-            Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
-            System.out.println("Connecting to database..");
-            String checkSQL = "Select * FROM my_streaming1.user WHERE userID = ? AND  = ?";
-
-
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
     }
 }
-
